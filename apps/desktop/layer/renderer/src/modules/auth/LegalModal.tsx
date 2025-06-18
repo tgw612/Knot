@@ -1,10 +1,15 @@
-import { legalHtml } from "@follow/legal"
+// 导入法律条款HTML内容
+// import { legalHtml } from "@follow/legal"
 import { stopPropagation } from "@follow/utils/dom"
 import { m } from "motion/react"
 import type { FC } from "react"
 
 type LegalModalProps = {
   type: "privacy" | "tos"
+}
+export const legalHtml = {
+  privacy: "<html>隐私政策内容</html>",
+  tos: "<html>服务条款内容</html>",
 }
 
 export const LegalModalContent: FC<LegalModalProps> = ({ type }) => {

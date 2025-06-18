@@ -1,5 +1,6 @@
 export const DEFAULT_VALUES = {
   PROD: {
+    //   API_URL: "http://localhost:2234/api",
     API_URL: "https://api.follow.is",
     WEB_URL: "https://app.follow.is",
     INBOXES_EMAIL: "@follow.re",
