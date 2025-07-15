@@ -74,7 +74,7 @@ export class Auth {
       }
 
       this.authClient.signIn.social({
-        provider: provider as "google" | "github" | "apple",
+        provider: provider as "google" | "apple" | "okx",
         callbackURL: runtime === "app" ? `${this.options.webURL}/login` : this.options.webURL,
       })
     }

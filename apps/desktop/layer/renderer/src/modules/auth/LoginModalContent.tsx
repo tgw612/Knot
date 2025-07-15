@@ -10,16 +10,14 @@ import { stopPropagation } from "@follow/utils/dom"
 import { cn } from "@follow/utils/utils"
 import { m } from "motion/react"
 import { useState } from "react"
-import { Trans, useTranslation } from "react-i18next"
+import { useTranslation } from "react-i18next"
 
 import { useCurrentModal, useModalStack } from "~/components/ui/modal/stacked/hooks"
 import { loginHandler } from "~/lib/auth"
-import { handleSessionChanges } from "~/queries/auth"
 import { useAuthProviders } from "~/queries/users"
 
 import { LoginWithPassword, RegisterForm } from "./Form"
 import { LegalModalContent } from "./LegalModal"
-import { TokenModalContent } from "./TokenModal"
 
 interface LoginModalContentProps {
   runtime: LoginRuntime
@@ -53,13 +51,13 @@ export const LoginModalContent = (props: LoginModalContentProps) => {
     })
   }
 
-  const handleOpenToken = () => {
-    present({
-      id: "token",
-      title: t("login.enter_token"),
-      content: () => <TokenModalContent />,
-    })
-  }
+  // const handleOpenToken = () => {
+  //   present({
+  //     id: "token",
+  //     title: t("login.enter_token"),
+  //     content: () => <TokenModalContent />,
+  //   })
+  // }
 
   const isDark = useIsDark()
 
@@ -93,35 +91,38 @@ export const LoginModalContent = (props: LoginModalContentProps) => {
                     className="bg-material-ultra-thick border-material-medium relative h-12 w-full animate-pulse rounded-xl border"
                   />
                 ))
-            : providers.map(([key, provider]) => (
-                <MotionButtonBase
-                  key={key}
-                  onClick={() => {
-                    if (key === "credential") {
-                      setIsEmail(true)
-                    } else {
-                      loginHandler(key, "app")
-                    }
-                  }}
-                  className="center hover:bg-material-medium relative w-full gap-2 rounded-xl border py-3 pl-5 font-semibold duration-200"
-                >
-                  <img
-                    className={cn(
-                      "absolute left-9 h-5",
-                      !provider.iconDark64 &&
-                        "dark:brightness-[0.85] dark:hue-rotate-180 dark:invert",
-                    )}
-                    src={isDark ? provider.iconDark64 || provider.icon64 : provider.icon64}
-                  />
-                  <span>{t("login.continueWith", { provider: provider.name })}</span>
-                </MotionButtonBase>
-              ))}
+            : providers
+                .filter(([key]) => key !== "github" && key !== "credential") // 过滤掉GitHub和Email登录
+                .map(([key, provider]) => (
+                  <MotionButtonBase
+                    key={key}
+                    onClick={() => {
+                      if (key === "credential") {
+                        setIsEmail(true)
+                      } else {
+                        loginHandler(key, "app")
+                      }
+                    }}
+                    className="center hover:bg-material-medium relative w-full gap-2 rounded-xl border py-3 pl-5 font-semibold duration-200"
+                  >
+                    <img
+                      className={cn(
+                        "absolute left-9 h-5",
+                        !provider.iconDark64 &&
+                          "dark:brightness-[0.85] dark:hue-rotate-180 dark:invert",
+                      )}
+                      src={isDark ? provider.iconDark64 || provider.icon64 : provider.icon64}
+                    />
+                    <span>{t("login.continueWith", { provider: provider.name })}</span>
+                  </MotionButtonBase>
+                ))}
 
-          <div className="text-text-secondary -mb-1.5 mt-1 text-center text-xs leading-4">
+          {/* <div className="text-text-secondary -mb-1.5 mt-1 text-center text-xs leading-4">
             <a onClick={() => handleOpenToken()} className="hover:underline">
               {t("login.enter_token")}
             </a>
-          </div>
+          </div> */}
+
           <div className="text-text-secondary text-center text-xs leading-4">
             <span>{t("login.agree_to")}</span>{" "}
             <a onClick={() => handleOpenLegal("tos")} className="text-accent hover:underline">
@@ -135,7 +136,6 @@ export const LoginModalContent = (props: LoginModalContentProps) => {
         </div>
       )}
 
-      <Divider className="mb-5 mt-4" />
       <div className="flex items-center justify-center pb-2">
         <MotionButtonBase
           key="okx"
@@ -148,10 +148,8 @@ export const LoginModalContent = (props: LoginModalContentProps) => {
               }
               const resp = await okxProvider.connect()
               if (resp && resp.publicKey) {
-                // 这里可以将 publicKey 作为用户唯一标识，进行后续登录逻辑
-                // TODO: 你可以在此处调用 loginHandler 或自定义登录逻辑
-                alert(`OKX 钱包连接成功，公钥：${resp.publicKey}`)
-                handleSessionChanges()
+                // 调用与Google登录相同的逻辑
+                loginHandler("okx", "app")
               }
             } catch (e) {
               alert(`OKX 钱包连接失败：${e}`)
@@ -164,9 +162,11 @@ export const LoginModalContent = (props: LoginModalContentProps) => {
             style={{ color: "#0f8fff" }}
             src="https://static.okx.com/cdn/wallet/logo_okxwallet.svg"
           />
-          <span>使用 OKX 钱包登录</span>
+          <span>使用 OKX钱包 继续</span>
         </MotionButtonBase>
       </div>
+
+      <Divider className="mb-5 mt-4" />
     </>
   )
   if (isMobile) {

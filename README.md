@@ -3,7 +3,7 @@
     <img src="https://github.com/RSSNext/follow/assets/41265413/c6c02ad5-cddc-46f5-8420-a47afe1c82fe" alt="Logo" width="80" height="80">
   </a>
 
-  <h3>Folo</h3>
+  <h3>Popfun</h3>
   <p>
     <img src="https://github.com/user-attachments/assets/cbe924f2-d8b0-48b0-814e-7c06ccb1911c" height="60" />
     &nbsp;&nbsp;&nbsp;
