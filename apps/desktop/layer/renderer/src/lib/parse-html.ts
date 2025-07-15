@@ -108,6 +108,7 @@ export const parseHtml = (
         markInlineImage(node)
         return createElement("i", props, props.children)
       },
+      // @ts-ignore
       math: Math,
       hr: ({ node, ...props }) =>
         createElement("hr", {
@@ -123,6 +124,25 @@ export const parseHtml = (
           } as any)
         }
         return createElement("input", props)
+      },
+      iframe: ({ node, ...props }) => {
+        const { width, height, src, ...rest } = props
+
+        // Apply security sandbox attributes and responsive styling
+        return createElement("iframe", {
+          ...rest,
+          src,
+          width: width || "100%",
+          height: height || "315",
+          className: "max-w-full rounded",
+          sandbox: "allow-scripts allow-same-origin allow-popups allow-forms",
+          allowFullScreen: true,
+          loading: "lazy",
+          style: {
+            aspectRatio: width && height ? `${width} / ${height}` : "16 / 9",
+            ...rest.style,
+          },
+        })
       },
       pre: ({ node, ...props }) => {
         if (!props.children) return null

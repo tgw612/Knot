@@ -10,14 +10,16 @@ import { stopPropagation } from "@follow/utils/dom"
 import { cn } from "@follow/utils/utils"
 import { m } from "motion/react"
 import { useState } from "react"
-import { useTranslation } from "react-i18next"
+import { Trans, useTranslation } from "react-i18next"
 
+import { useServerConfigs } from "~/atoms/server-configs"
 import { useCurrentModal, useModalStack } from "~/components/ui/modal/stacked/hooks"
 import { loginHandler } from "~/lib/auth"
 import { useAuthProviders } from "~/queries/users"
 
 import { LoginWithPassword, RegisterForm } from "./Form"
 import { LegalModalContent } from "./LegalModal"
+import { ReferralForm } from "./ReferralForm"
 
 interface LoginModalContentProps {
   runtime: LoginRuntime
@@ -25,6 +27,8 @@ interface LoginModalContentProps {
 }
 
 export const LoginModalContent = (props: LoginModalContentProps) => {
+  const serverConfigs = useServerConfigs()
+
   const modal = useCurrentModal()
   const { present } = useModalStack()
 
@@ -37,7 +41,7 @@ export const LoginModalContent = (props: LoginModalContentProps) => {
 
   const providers = Object.entries(authProviders || [])
 
-  const [isRegister] = useState(true)
+  const [isRegister, setIsRegister] = useState(true)
   const [isEmail, setIsEmail] = useState(false)
 
   const handleOpenLegal = (type: "privacy" | "tos") => {
@@ -61,8 +65,24 @@ export const LoginModalContent = (props: LoginModalContentProps) => {
 
   const isDark = useIsDark()
 
+  const handleLoginStateChange = (state: "register" | "login") => {
+    setIsRegister(state === "register")
+  }
+
   const Inner = (
     <>
+      {isEmail && (
+        <div className="absolute left-8 top-6">
+          <MotionButtonBase
+            className="cursor-button hover:text-accent flex items-center gap-2 text-center font-medium duration-200"
+            onClick={() => setIsEmail(false)}
+          >
+            <i className="i-mgc-left-cute-fi" />
+            {t("login.back")}
+          </MotionButtonBase>
+        </div>
+      )}
+
       <div className="-mt-9 mb-4 flex items-center justify-center">
         <Logo className="size-16" />
       </div>
@@ -75,9 +95,9 @@ export const LoginModalContent = (props: LoginModalContentProps) => {
 
       {isEmail ? (
         isRegister ? (
-          <RegisterForm />
+          <RegisterForm onLoginStateChange={handleLoginStateChange} />
         ) : (
-          <LoginWithPassword runtime={runtime} />
+          <LoginWithPassword runtime={runtime} onLoginStateChange={handleLoginStateChange} />
         )
       ) : (
         <div className="mb-3 flex flex-col items-center justify-center gap-4">
@@ -117,7 +137,10 @@ export const LoginModalContent = (props: LoginModalContentProps) => {
                   </MotionButtonBase>
                 ))}
 
-          {/* <div className="text-text-secondary -mb-1.5 mt-1 text-center text-xs leading-4">
+          {isRegister && serverConfigs?.REFERRAL_ENABLED && (
+            <ReferralForm className="mb-4 w-full" />
+          )}
+          {/*<div className="text-text-secondary -mb-1.5 mt-1 text-center text-xs leading-4">
             <a onClick={() => handleOpenToken()} className="hover:underline">
               {t("login.enter_token")}
             </a>
@@ -166,7 +189,20 @@ export const LoginModalContent = (props: LoginModalContentProps) => {
         </MotionButtonBase>
       </div>
 
-      <Divider className="mb-5 mt-4" />
+      {!isEmail && (
+        <>
+          <Divider className="mb-5 mt-4" />
+          <div className="pb-2 text-center font-medium" onClick={() => setIsRegister(!isRegister)}>
+            <Trans
+              t={t}
+              i18nKey={isRegister ? "login.have_account" : "login.no_account"}
+              components={{
+                strong: <span className="text-accent" />,
+              }}
+            />
+          </div>
+        </>
+      )}
     </>
   )
   if (isMobile) {
@@ -184,7 +220,7 @@ export const LoginModalContent = (props: LoginModalContentProps) => {
         <div
           onClick={stopPropagation}
           tabIndex={-1}
-          className="bg-background w-[26rem] rounded-xl border p-3 px-8 shadow-2xl shadow-stone-300 dark:border-neutral-700 dark:shadow-stone-800"
+          className="bg-background relative w-[26rem] rounded-xl border p-3 px-8 shadow-2xl shadow-stone-300 dark:border-neutral-700 dark:shadow-stone-800"
         >
           {Inner}
         </div>

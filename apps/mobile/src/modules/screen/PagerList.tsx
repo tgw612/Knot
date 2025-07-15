@@ -4,15 +4,23 @@ import { EventBus } from "@follow/utils/event-bus"
 import * as Haptics from "expo-haptics"
 import { useCallback, useEffect, useId, useMemo, useRef } from "react"
 import type { StyleProp, ViewStyle } from "react-native"
-import { Animated, StyleSheet, View } from "react-native"
+import { StyleSheet, View } from "react-native"
+import type {
+  PagerViewOnPageScrollEventData,
+  PagerViewOnPageSelectedEventData,
+  PageScrollStateChangedNativeEventData,
+} from "react-native-pager-view"
 import PagerView from "react-native-pager-view"
-import { useSharedValue } from "react-native-reanimated"
+import Animated, { runOnJS, useEvent, useHandler } from "react-native-reanimated"
 
-import { selectTimeline, useSelectedFeed } from "@/src/modules/screen/atoms"
-
+import { selectTimeline, useSelectedFeed, useTimelineSelectorDragProgress } from "./atoms"
 import { PagerListVisibleContext, PagerListWillVisibleContext } from "./PagerListContext"
 
-const AnimatedPagerView = Animated.createAnimatedComponent<typeof PagerView>(PagerView)
+const AnimatedPagerView = Animated.createAnimatedComponent(PagerView)
+
+const handlePageSelected = () => {
+  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+}
 
 export function PagerList({
   renderItem,
@@ -30,6 +38,7 @@ export function PagerList({
     () => activeViews.indexOf(viewId as FeedViewType),
     [activeViews, viewId],
   )
+  const dragProgress = useTimelineSelectorDragProgress()
 
   const pagerRef = useRef<PagerView>(null)
 
@@ -41,42 +50,27 @@ export function PagerList({
       }
     })
   }, [activeViews, pagerRef, rid])
-  const userInitiatedDragRef = useSharedValue(false)
 
-  // const [dragging, setDragging] = useState(false)
-  const pageScrollHandler = useCallback(
-    (e: {
-      nativeEvent: {
-        position: number
-        offset: number
-      }
-    }) => {
-      "worklet"
-
-      const { position, offset } = e.nativeEvent
-
-      if (!userInitiatedDragRef.value) {
-        return
-      }
-
-      let targetIndex: number
-
-      if (offset > 0.6 && position < activeViews.length - 1) {
-        targetIndex = position + 1
-      } else if (offset < 0.4 && position === activeViewIndex - 1) {
-        targetIndex = position
-      } else if (offset === 0 && position === activeViewIndex) {
-        targetIndex = activeViewIndex
-      } else {
-        targetIndex = activeViewIndex
-      }
-
-      if (targetIndex !== activeViewIndex) {
-        selectTimeline({ type: "view", viewId: activeViews[targetIndex]! }, rid)
-        userInitiatedDragRef.value = false
-      }
+  const onPageSelectedJS = useCallback(
+    (view: FeedViewType) => {
+      selectTimeline({ type: "view", viewId: view }, rid)
     },
-    [activeViewIndex, activeViews, rid, userInitiatedDragRef],
+    [rid],
+  )
+
+  const handlePageScroll = usePagerHandlers(
+    {
+      onPageScroll(e: PagerViewOnPageScrollEventData) {
+        "worklet"
+        const { position, offset } = e
+        dragProgress.set(offset + position)
+      },
+      onPageSelected(e: PagerViewOnPageSelectedEventData) {
+        "worklet"
+        runOnJS(onPageSelectedJS)(activeViews[e.position]!)
+      },
+    },
+    [],
   )
 
   return (
@@ -88,21 +82,8 @@ export function PagerList({
       layoutDirection="ltr"
       offscreenPageLimit={1}
       overdrag
-      onPageScroll={pageScrollHandler}
-      onPageScrollStateChanged={(e) => {
-        const { pageScrollState } = e.nativeEvent
-        if (pageScrollState === "dragging") {
-          // setDragging(true)
-          userInitiatedDragRef.value = true
-        } else if (pageScrollState === "idle") {
-          // setDragging(false)
-        }
-
-        if (pageScrollState === "settling") {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
-        }
-      }}
-      pageMargin={100}
+      onPageScroll={handlePageScroll}
+      onPageSelected={handlePageSelected}
       orientation="horizontal"
     >
       {useMemo(
@@ -124,6 +105,37 @@ export function PagerList({
         [activeViews, activeViewIndex, renderItem],
       )}
     </AnimatedPagerView>
+  )
+}
+
+/**
+ * Ported from bluesky-social/social-app
+ * https://github.com/bluesky-social/social-app/blob/bf95345b333c56876cabf4c5b8516c431cc8ce9b/src/view/com/pager/Pager.tsx#L159-L190
+ */
+function usePagerHandlers(
+  handlers: {
+    onPageScroll: (e: PagerViewOnPageScrollEventData) => void
+    onPageScrollStateChanged?: (e: PageScrollStateChangedNativeEventData) => void
+    onPageSelected?: (e: PagerViewOnPageSelectedEventData) => void
+  },
+  dependencies: unknown[],
+) {
+  const { doDependenciesDiffer } = useHandler(handlers as any, dependencies)
+  const subscribeForEvents = ["onPageScroll", "onPageScrollStateChanged", "onPageSelected"]
+  return useEvent(
+    (event) => {
+      "worklet"
+      const { onPageScroll, onPageScrollStateChanged, onPageSelected } = handlers
+      if (event.eventName.endsWith("onPageScroll")) {
+        onPageScroll(event as any as PagerViewOnPageScrollEventData)
+      } else if (event.eventName.endsWith("onPageScrollStateChanged")) {
+        onPageScrollStateChanged?.(event as any as PageScrollStateChangedNativeEventData)
+      } else if (event.eventName.endsWith("onPageSelected")) {
+        onPageSelected?.(event as any as PagerViewOnPageSelectedEventData)
+      }
+    },
+    subscribeForEvents,
+    doDependenciesDiffer,
   )
 }
 

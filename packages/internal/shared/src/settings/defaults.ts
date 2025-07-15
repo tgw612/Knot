@@ -27,9 +27,10 @@ export const defaultGeneralSettings: GeneralSettings = {
   scrollMarkUnread: true,
   hoverMarkUnread: true,
   renderMarkUnread: false,
-  // UX
+  // timeline
   groupByDate: true,
   autoExpandLongSocialMedia: false,
+  dimRead: false,
 
   // Secure
   jumpOutLinkWarn: true,
@@ -44,6 +45,8 @@ export const defaultGeneralSettings: GeneralSettings = {
 }
 
 export const defaultUISettings: UISettings = {
+  accentColor: "orange",
+
   // Sidebar
   entryColWidth: 356,
   feedColWidth: 256,
@@ -132,6 +135,12 @@ export const defaultIntegrationSettings: IntegrationSettings = {
   enableZotero: false,
   zoteroUserID: "",
   zoteroToken: "",
+
+  // qbittorrent
+  enableQBittorrent: false,
+  qbittorrentHost: "",
+  qbittorrentUsername: "",
+  qbittorrentPassword: "",
 
   saveSummaryAsDescription: false,
 }

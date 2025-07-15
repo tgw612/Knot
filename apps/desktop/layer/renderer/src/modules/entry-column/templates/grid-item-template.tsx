@@ -4,6 +4,7 @@ import { useEntry } from "@follow/store/entry/hooks"
 import { useFeedById } from "@follow/store/feed/hooks"
 import { cn } from "@follow/utils/utils"
 import dayjs from "dayjs"
+import { useTranslation } from "react-i18next"
 
 import { useEntryIsRead } from "~/hooks/biz/useAsRead"
 import { EntryTranslation } from "~/modules/entry-column/translation"
@@ -71,6 +72,8 @@ export const GridItemFooter = ({
 
   const asRead = useEntryIsRead(entry)
 
+  const { t } = useTranslation("common")
+
   if (!entry) return null
   return (
     <div className={cn("relative px-2 text-sm")}>
@@ -100,17 +103,20 @@ export const GridItemFooter = ({
       <div className="flex items-center gap-1 truncate text-[13px]">
         <FeedIcon
           fallback
-          className="mr-0.5 flex"
+          noMargin
+          className="flex"
           feed={feeds!}
           entry={entry?.iconEntry}
           size={18}
         />
-        <span className={cn("min-w-0 truncate", descriptionClassName)}>
+        <span className={cn("min-w-0 truncate pl-1", descriptionClassName)}>
           <FeedTitle feed={feeds} />
         </span>
         <span className={cn("text-zinc-500", timeClassName)}>·</span>
         <span className={cn("text-zinc-500", timeClassName)}>
           {dayjs.duration(dayjs(entry?.publishedAt).diff(dayjs(), "minute"), "minute").humanize()}
+          {t("space")}
+          {t("words.ago")}
         </span>
       </div>
     </div>

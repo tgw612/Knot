@@ -2,12 +2,13 @@ import { isMobile } from "@follow/components/hooks/useMobile.js"
 import { FeedViewType, UserRole, views } from "@follow/constants"
 import { IN_ELECTRON } from "@follow/shared/constants"
 import { useIsEntryStarred } from "@follow/store/collection/hooks"
-import { getEntry } from "@follow/store/entry/getter"
 import { useEntry } from "@follow/store/entry/hooks"
 import { entrySyncServices } from "@follow/store/entry/store"
 import type { EntryModel } from "@follow/store/entry/types"
 import { useFeedById } from "@follow/store/feed/hooks"
 import { useIsInbox } from "@follow/store/inbox/hooks"
+import { whoami } from "@follow/store/user/getters"
+import { useUserRole } from "@follow/store/user/hooks"
 import { doesTextContainHTML } from "@follow/utils/utils"
 import { useMemo } from "react"
 
@@ -21,7 +22,6 @@ import {
   useEntryIsInReadability,
 } from "~/atoms/readability"
 import { useShowSourceContent } from "~/atoms/source-content"
-import { useUserRole, whoami } from "~/atoms/user"
 import { ipcServices } from "~/lib/client"
 import { COMMAND_ID } from "~/modules/command/commands/id"
 import { getCommand, useRunCommandFn } from "~/modules/command/hooks/use-command"
@@ -45,14 +45,10 @@ export const toggleEntryReadability = async ({ id, url }: { id: string; url: str
       [id]: ReadabilityStatus.WAITING,
     })
     try {
-      const data = getEntry(id)?.readabilityContent
-
-      if (!data) {
-        await entrySyncServices.fetchEntryReadabilityContent(id, async () => {
-          const res = await ipcServices?.reader.readability({ url })
-          return res?.content
-        })
-      }
+      await entrySyncServices.fetchEntryReadabilityContent(id, async () => {
+        const res = await ipcServices?.reader.readability({ url })
+        return res?.content
+      })
 
       setReadabilityStatus({
         [id]: ReadabilityStatus.SUCCESS,
@@ -128,6 +124,7 @@ const entrySelector = (state: EntryModel) => {
   const { summary, translation, readability } = state.settings || {}
 
   const media = state.media || []
+  const attachments = state.attachments || []
   const images = media.filter((a) => a.type === "photo")
   const imagesLength = images.length
 
@@ -143,6 +140,7 @@ const entrySelector = (state: EntryModel) => {
     hasContent,
     doesContentContainsHTMLTags,
     imagesLength,
+    hasBitTorrent: attachments.some((a) => a.mime_type === "application/x-bittorrent"),
   }
 }
 
@@ -227,6 +225,12 @@ export const useEntryActions = ({
         entryId,
       }),
       new EntryActionMenuItem({
+        id: COMMAND_ID.integration.saveToQBittorrent,
+        onClick: runCmdFn(COMMAND_ID.integration.saveToQBittorrent, [{ entryId }]),
+        hide: !IN_ELECTRON || !entry.hasBitTorrent,
+        entryId,
+      }),
+      new EntryActionMenuItem({
         id: COMMAND_ID.entry.tip,
         onClick: runCmdFn(COMMAND_ID.entry.tip, [
           { entryId, feedId: feed?.id, userId: feed?.ownerUserId },
@@ -291,7 +295,7 @@ export const useEntryActions = ({
             view,
           ),
         active: isShowAISummaryOnce,
-        disabled: userRole === UserRole.Trial,
+        disabled: userRole === UserRole.Free || userRole === UserRole.Trial,
         entryId,
       }),
       new EntryActionMenuItem({
@@ -303,7 +307,7 @@ export const useEntryActions = ({
             view,
           ),
         active: isShowAITranslationOnce,
-        disabled: userRole === UserRole.Trial,
+        disabled: userRole === UserRole.Free || userRole === UserRole.Trial,
         entryId,
       }),
       new EntryActionMenuItem({
@@ -374,6 +378,14 @@ export const useEntryActions = ({
     hasEntry,
     runCmdFn,
     entryId,
+    entry?.hasBitTorrent,
+    entry?.url,
+    entry?.imagesLength,
+    entry?.publishedAt,
+    entry?.read,
+    entry?.hasContent,
+    entry?.readability,
+    entry?.doesContentContainsHTMLTags,
     feed?.id,
     feed?.ownerUserId,
     feed?.siteUrl,
@@ -381,12 +393,6 @@ export const useEntryActions = ({
     shortcuts,
     view,
     isInCollection,
-    entry?.url,
-    entry?.publishedAt,
-    entry?.hasContent,
-    entry?.read,
-    entry?.readability,
-    entry?.imagesLength,
     isShowSourceContent,
     isShowAISummaryAuto,
     isShowAISummaryOnce,
@@ -395,7 +401,6 @@ export const useEntryActions = ({
     isShowAITranslationOnce,
     compact,
     isEntryInReadability,
-    entry?.doesContentContainsHTMLTags,
   ])
 
   return actionConfigs

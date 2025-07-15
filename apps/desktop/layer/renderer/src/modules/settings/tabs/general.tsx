@@ -5,6 +5,7 @@ import { ACTION_LANGUAGE_MAP } from "@follow/shared"
 import { IN_ELECTRON } from "@follow/shared/constants"
 import { cn } from "@follow/utils/utils"
 import { useQuery } from "@tanstack/react-query"
+import dayjs from "dayjs"
 import { useAtom } from "jotai"
 import { useEffect } from "react"
 import { useTranslation } from "react-i18next"
@@ -134,10 +135,13 @@ export const SettingGeneral = () => {
             label: t("general.group_by_date.label"),
             description: t("general.group_by_date.description"),
           }),
-
           defineSettingItem("autoExpandLongSocialMedia", {
             label: t("general.auto_expand_long_social_media.label"),
             description: t("general.auto_expand_long_social_media.description"),
+          }),
+          defineSettingItem("dimRead", {
+            label: t("general.dim_read.label"),
+            description: t("general.dim_read.description"),
           }),
           isMobile &&
             defineSettingItem("showQuickTimeline", {
@@ -269,6 +273,7 @@ export const LanguageSelector = ({
         disabled={loadingLanguageLockMap[finalRenderLanguage]}
         onValueChange={(value) => {
           setGeneralSetting("language", value as string)
+          dayjs.locale(value)
         }}
         renderItem={useTypeScriptHappyCallback((item) => {
           const lang = item.value

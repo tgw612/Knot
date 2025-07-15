@@ -18,14 +18,15 @@ import { useRouteParams, useRouteParamsSelector } from "~/hooks/biz/useRoutePara
 import { useFeedQuery } from "~/queries/feed"
 import { useFeedHeaderTitle } from "~/store/feed/hooks"
 
+import { EntryColumnWrapper } from "./components/entry-column-wrapper/EntryColumnWrapper"
 import { FooterMarkItem } from "./components/FooterMarkItem"
+import { EntryItemSkeleton } from "./EntryItemSkeleton"
 import { EntryColumnGrid } from "./grid"
 import { useEntriesByView } from "./hooks/useEntriesByView"
 import { useSnapEntryIdList } from "./hooks/useEntryIdListSnap"
 import { useEntryMarkReadHandler } from "./hooks/useEntryMarkReadHandler"
 import { EntryListHeader } from "./layouts/EntryListHeader"
 import { EntryEmptyList, EntryList } from "./list"
-import { EntryColumnWrapper } from "./wrapper"
 
 function EntryColumnImpl() {
   const listRef = useRef<Virtualizer<HTMLElement, Element>>(undefined)
@@ -150,7 +151,9 @@ function EntryColumnImpl() {
         key={`${routeFeedId}-${view}`}
       >
         {entriesIds.length === 0 ? (
-          entries.isLoading ? null : (
+          entries.isLoading ? (
+            <EntryItemSkeleton view={view} />
+          ) : (
             <EntryEmptyList />
           )
         ) : (
@@ -165,7 +168,13 @@ function EntryColumnImpl() {
             fetchNextPage={fetchNextPage}
             refetch={entries.refetch}
             groupCounts={groupedCounts}
-            Footer={<FooterMarkItem view={view} />}
+            Footer={
+              isCollection ? (
+                void 0
+              ) : (
+                <FooterMarkItem view={view} fetchedTime={entries.fetchedTime} />
+              )
+            }
           />
         )}
       </EntryColumnWrapper>

@@ -5,16 +5,16 @@ import { createHash } from "node:crypto"
 import { existsSync, readFileSync } from "node:fs"
 import { mkdir, readdir, rename, rm, stat, writeFile } from "node:fs/promises"
 import os from "node:os"
-import path from "node:path"
 
 import { callWindowExpose } from "@follow/shared/bridge"
 import { mainHash, version as appVersion } from "@pkg"
 import log from "electron-log"
 import { load } from "js-yaml"
+import path from "pathe"
 import { x } from "tar"
 
 import { GITHUB_OWNER, GITHUB_REPO, HOTUPDATE_RENDER_ENTRY_DIR } from "~/constants/app"
-import { getMainWindow } from "~/window"
+import { WindowManager } from "~/manager/window"
 
 import { appUpdaterConfig } from "./configs"
 
@@ -180,7 +180,7 @@ export const hotUpdateRender = async (manifest: Manifest) => {
   )
   logger.info(`Hot update render success, update to ${manifest.version}`)
 
-  const mainWindow = getMainWindow()
+  const mainWindow = WindowManager.getMainWindow()
   if (!mainWindow) return false
   const caller = callWindowExpose(mainWindow)
   caller.readyToUpdate()

@@ -2,12 +2,12 @@ import { useEntry, useEntryReadHistory } from "@follow/store/entry/hooks"
 import { useFeedById } from "@follow/store/feed/hooks"
 import { useInboxById } from "@follow/store/inbox/hooks"
 import { useEntryTranslation } from "@follow/store/translation/hooks"
+import { useWhoami } from "@follow/store/user/hooks"
 import { formatEstimatedMins, formatTimeToSeconds } from "@follow/utils"
 import { titleCase } from "title-case"
 
 import { useActionLanguage } from "~/atoms/settings/general"
 import { useUISettingKey } from "~/atoms/settings/ui"
-import { useWhoami } from "~/atoms/user"
 import { RelativeTime } from "~/components/ui/datetime"
 import { useNavigateEntry } from "~/hooks/biz/useNavigateEntry"
 import { useFeedSafeUrl } from "~/hooks/common/useFeedSafeUrl"
@@ -64,6 +64,8 @@ export const EntryTitle = ({ entryId, compact }: EntryLinkProps) => {
   const dateFormat = useUISettingKey("dateFormat")
 
   const navigateEntry = useNavigateEntry()
+
+  const hideRecentReader = useUISettingKey("hideRecentReader")
 
   if (!entry) return null
 
@@ -132,7 +134,7 @@ export const EntryTitle = ({ entryId, compact }: EntryLinkProps) => {
                 (entryHistory?.readCount ?? 0) +
                 (entryHistory?.userIds?.every((id) => id !== user?.id) ? 1 : 0)
 
-              return readCount > 0 ? (
+              return readCount > 0 && !hideRecentReader ? (
                 <div className="flex items-center gap-1.5">
                   <i className="i-mgc-eye-2-cute-re text-base" />
                   <span className="text-xs tabular-nums">{readCount.toLocaleString()}</span>

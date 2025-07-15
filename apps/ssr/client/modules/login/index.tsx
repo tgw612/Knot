@@ -57,12 +57,14 @@ export function Login() {
     const { data } = await oneTimeToken.generate()
     if (!data) return null
     return {
-      url: `${DEEPLINK_SCHEME}auth?token=${data.token}`,
+      url: `auth?token=${data.token}`,
     }
   }, [])
 
   const [openFailed, setOpenFailed] = useState(false)
   const [callbackUrl, setCallbackUrl] = useState<string>()
+  const callbackUrlWithScheme = callbackUrl ? `${DEEPLINK_SCHEME}${callbackUrl}` : undefined
+
   const handleOpenApp = useCallback(async () => {
     const callbackUrl = await getCallbackUrl()
     if (!callbackUrl) return
@@ -115,16 +117,6 @@ export function Login() {
             </p>
             <div className="center mt-8 flex flex-col gap-4 sm:flex-row">
               <Button
-                variant="text"
-                buttonClassName="h-14 text-base px-10 rounded-full"
-                onClick={() => {
-                  window.location.href = "/"
-                }}
-              >
-                {t("redirect.continueInBrowser")}
-              </Button>
-
-              <Button
                 variant="primary"
                 buttonClassName="h-12 !rounded-full px-10 text-lg"
                 onClick={handleOpenApp}
@@ -132,15 +124,24 @@ export function Login() {
                 {t("redirect.openApp", { app_name: APP_NAME })}
               </Button>
             </div>
-            {openFailed && callbackUrl && (
+            {openFailed && callbackUrlWithScheme && (
               <div className="text-text mt-8 w-[31rem] space-y-2 text-center text-sm">
+                <p className="text-base">
+                  <Trans
+                    t={t}
+                    i18nKey="login.no_client"
+                    components={{
+                      weblink: <Link to="/" className="text-accent" />,
+                    }}
+                  />
+                </p>
                 <p>{t("login.enter_token")}</p>
                 <p className="bg-fill-tertiary flex items-center justify-center gap-4 rounded-lg p-3">
-                  <span className="blur-sm hover:blur-none">{callbackUrl}</span>
+                  <span className="blur-sm hover:blur-none">{callbackUrlWithScheme}</span>
                   <i
                     className="i-mgc-copy-2-cute-re size-4 cursor-pointer"
                     onClick={() => {
-                      navigator.clipboard.writeText(callbackUrl)
+                      navigator.clipboard.writeText(callbackUrlWithScheme)
                     }}
                   />
                 </p>
@@ -230,11 +231,11 @@ export function Login() {
   }, [LoginOrStatusContent, redirecting, t])
 
   return (
-    <div className="flex h-screen w-full flex-col items-center justify-center">
+    <div className="flex w-full flex-col items-center justify-center">
       <Logo className="size-16" />
 
       {!isAuthenticated && !isLoading && (
-        <h1 className="mb-6 mt-8 text-2xl">
+        <h1 className="my-8 text-3xl">
           {t("login.logInTo")} <b>{` ${APP_NAME}`}</b>
         </h1>
       )}

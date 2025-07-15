@@ -1,10 +1,10 @@
 import fs from "node:fs"
-import path from "node:path"
 
 import { callWindowExpose } from "@follow/shared/bridge"
 import { readability } from "@follow-app/readability"
 import { app, BrowserWindow } from "electron"
 import { MsEdgeTTS, OUTPUT_FORMAT } from "msedge-tts"
+import path from "pathe"
 import type { ModelResult } from "vscode-languagedetection"
 
 import { detectCodeStringLanguage } from "../../modules/language-detection"
@@ -56,7 +56,7 @@ export class ReaderService extends IpcService {
     if (!window) return null
 
     try {
-      await tts.setMetadata(voice, OUTPUT_FORMAT.AUDIO_24KHZ_96KBITRATE_MONO_MP3)
+      await tts.setMetadata(voice, OUTPUT_FORMAT.AUDIO_24KHZ_96KBITRATE_MONO_MP3, {})
     } catch (error: unknown) {
       console.error("Failed to set voice", error)
       if (error instanceof Error) {

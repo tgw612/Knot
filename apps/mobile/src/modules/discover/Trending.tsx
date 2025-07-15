@@ -32,6 +32,9 @@ export const Trending = ({
         lang: discoverLanguage === "all" ? undefined : discoverLanguage,
         limit: 20,
       }).then((res) => res.data),
+    meta: {
+      persist: true,
+    },
   })
   const navigation = useNavigation()
 
@@ -86,7 +89,7 @@ export const Trending = ({
               }
             >
               <View className="flex flex-row items-center gap-1 opacity-60">
-                <User3CuteReIcon width={13} height={13} />
+                <User3CuteReIcon width={13} height={13} color={label} />
                 <Text className="text-text text-sm">
                   {formatNumber(item.analytics.subscriptionCount || 0)}
                 </Text>
