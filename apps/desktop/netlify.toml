@@ -1,0 +1,11 @@
+[build]
+  base = "apps/desktop"
+  publish = "out/web"
+  command = "pnpm run build:web"
+
+[build.environment]
+  NODE_VERSION = "20.12.0"
+
+[context.production.environment]
+  VITE_API_URL = "https://api.yourdomain.com"
+  VITE_FIREBASE_CONFIG = "your-firebase-config-json"

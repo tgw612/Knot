@@ -37,6 +37,30 @@
 
 As they say, your thoughts are what you read—and we’ve been consuming noisy feeds for too long! Folo organizes content into one timeline, keeping you updated on what matters, noise-free. Share lists, explore collections, and enjoy distraction-free browsing.
 
+## 🔑 登录认证
+
+### Google 登录流程
+
+1. **前端配置**
+   - 在Google Cloud Console创建OAuth 2.0客户端ID
+   - 配置授权重定向URI：`folo://auth/google`
+2. **后端验证**
+   - 使用`@react-oauth/google`处理授权码
+   - 通过REST API交换访问令牌
+   - 验证ID Token并创建本地会话
+
+### 权限范围
+
+- `email` - 获取用户邮箱
+- `profile` - 获取基础个人信息
+- `openid` - OpenID Connect认证
+
+完整实现参考：
+
+```tsx:/apps/desktop/layer/renderer/src/modules/auth/LoginModalContent.tsx
+// Google登录组件实现
+```
+
 ## 👋🏻 Getting Started & Join Our Community
 
 Whether for users or professional developers, Folo will be your open information playground. Please be aware that Folo is currently under active development, and feedback is welcome for any [issue](https://github.com/RSSNext/Folo/issues) encountered.
