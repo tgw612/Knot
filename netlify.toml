@@ -4,8 +4,15 @@
   command = "pnpm build"
 
 [build.environment]
-  NODE_VERSION = "20.12.0"
+  VITE_API_URL = "https://popfunssr.netlify.app"  # 确保与部署域名一致
+  # 请在Netlify控制台设置VITE_FIREBASE_CONFIG环境变量
 
+# API请求转发到后端服务
+[[redirects]]
+  from = "/api/*"
+  to = "https://your-api-service.com/:splat"  # 替换为实际API服务地址
+  status = 200
+  force = true
 # 静态资源重定向
 [[redirects]]
   from = "/assets/*"

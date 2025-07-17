@@ -1,6 +1,14 @@
-# Folo 桌面端（apps/desktop）
+# Popfun 桌面端（apps/desktop）
 
-Folo 桌面端是一个基于 Electron 和 React 技术栈开发的现代化信息聚合与阅读应用，支持多平台打包与分发，具备丰富的 UI 组件和高度可定制的构建流程。
+Popfun 桌面端是一个基于 Electron 和 React 技术栈开发的现代化信息聚合与阅读应用，支持多平台打包与分发，具备丰富的 UI 组件和高度可定制的构建流程。
+
+## 关键特性
+
+- **名称**：Popfun
+- **版本**：1.0.0
+- **主页**：[https://github.com/RSSNext/Popfun](https://github.com/RSSNext/Popfun)
+- **作者**：Popfun Team
+- **协议**：GPL-3.0
 
 ## 项目定位
 
@@ -74,4 +82,4 @@ Folo 桌面端是一个基于 Electron 和 React 技术栈开发的现代化信�
 
 ---
 
-如需详细开发文档、API 说明或贡献指南，请访问主仓库 [README](https://github.com/RSSNext/Folo) 或查阅源码注释。
+如需详细开发文档、API 说明或贡献指南，请访问主仓库 [README](https://github.com/RSSNext/Popfun) 或查阅源码注释。

@@ -1,6 +1,6 @@
-# Folo Command Abstractions
+# Popfun Command Abstractions
 
-this module encapsulates the command abstractions specifically designed for the Folo feature, which is leveraged through CMD-K.
+this module encapsulates the command abstractions specifically designed for the Popfun feature, which is leveraged through CMD-K.
 
 The architectural design of the API takes inspiration from the [VSCode Command Abstractions](https://code.visualstudio.com/api/references/contribution-points#contributes.commands).
 

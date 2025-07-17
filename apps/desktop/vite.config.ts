@@ -179,7 +179,7 @@ export default ({ mode }) => {
 
           manifest: {
             theme_color: "#000000",
-            name: "Folo",
+            name: "popfun",
             display: "standalone",
             background_color: "#ffffff",
             icons: [
