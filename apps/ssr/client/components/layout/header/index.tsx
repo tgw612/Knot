@@ -1,5 +1,5 @@
-import { Folo } from "@follow/components/icons/folo.js"
 import { Logo } from "@follow/components/icons/logo.jsx"
+import { Popfun } from "@follow/components/icons/popfun.js"
 import { SocialMediaLinks } from "@follow/constants"
 import { cn } from "@follow/utils/utils"
 import type { MotionValue } from "motion/react"
@@ -85,7 +85,7 @@ export const Header = () => {
                   isCompact ? "h-6 w-auto" : "h-8 w-auto",
                 )}
               />
-              <Folo
+              <Popfun
                 className={cn("transition-all duration-300", isCompact ? "size-7" : "size-10")}
               />
             </a>
